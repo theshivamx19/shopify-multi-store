@@ -1,6 +1,7 @@
 const Store = require('./Store');
 const Product = require('./Product');
 const ProductSync = require('./ProductSync');
+const OAuthState = require('./OAuthState');
 
 // Define associations
 Product.hasMany(ProductSync, {
@@ -26,5 +27,6 @@ ProductSync.belongsTo(Store, {
 module.exports = {
     Store,
     Product,
-    ProductSync
+    ProductSync,
+    OAuthState
 };

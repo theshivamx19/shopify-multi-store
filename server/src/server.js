@@ -4,7 +4,7 @@ const session = require('express-session');
 require('dotenv').config();
 
 const { sequelize, testConnection } = require('./config/database');
-const { Store, Product, ProductSync } = require('./models');
+const { Store, Product, ProductSync, OAuthState } = require('./models');
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -14,20 +14,29 @@ const productRoutes = require('./routes/products');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust proxy - required for ngrok and other reverse proxies
+app.set('trust proxy', 1);
+
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Session configuration
+// Session configuration for ngrok/HTTPS tunnels
 app.use(session({
-    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    secret: process.env.SESSION_SECRET || 'your-secret-key-change-in-production',
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
     cookie: {
-        secure: process.env.NODE_ENV === 'production',
+        secure: process.env.REDIRECT_URI?.startsWith('https'), // Auto-detect based on redirect URI
+        httpOnly: true,
+        sameSite: process.env.REDIRECT_URI?.startsWith('https') ? 'none' : 'lax',
         maxAge: 24 * 60 * 60 * 1000 // 24 hours
-    }
+    },
+    name: 'shopify.sid'
 }));
 
 // Routes
