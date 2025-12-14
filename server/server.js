@@ -5,6 +5,7 @@ require('dotenv').config();
 
 const { sequelize, testConnection } = require('./config/db');
 const { Store, Product, ProductSync, OAuthState } = require('./models');
+const productRoute = require('./routes/productRoutes')
 
 
 // Import routes
@@ -70,6 +71,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/auth', authRoutes);
+app.use('/products', productRoute)
 app.use('/api/stores', storeRoutes);
 app.use('/api/products', productRoutes);
 
