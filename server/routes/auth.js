@@ -3,6 +3,8 @@ const router = express.Router();
 const ShopifyService = require('../services/shopify');
 const { Store, OAuthState } = require('../models');
 
+
+const nonceStore = new Map()
 /**
  * GET /auth
  * Initiate OAuth flow
@@ -31,16 +33,16 @@ router.get('/', async (req, res) => {
     const redirectUri = process.env.REDIRECT_URI;
 
     const { installUrl, nonce } = ShopifyService.generateInstallUrl(shop, scopes, redirectUri);
-
+    const callbackAuthData = {
+        nonce,
+        used: false,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    }
+    nonceStore.set(shop, callbackAuthData)
     try {
         // Store state in database (expires in 10 minutes)
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
-        await OAuthState.create({
-            state: nonce,
-            shop: shop,
-            expiresAt: expiresAt,
-            used: false
-        });
+
 
         // Debug logging
         console.log('🔐 OAuth Installation Request:');
@@ -72,15 +74,7 @@ router.get('/callback', async (req, res) => {
     console.log('  Code:', code ? code.substring(0, 10) + '...' : 'missing');
 
     try {
-        // Verify state from database
-        const oauthState = await OAuthState.findOne({
-            where: {
-                state: state,
-                shop: shop
-            }
-        });
-
-        if (!oauthState) {
+        if (nonceStore.get(shop).nonce !== state) {
             console.error('❌ State not found in database');
             console.error('  Received state:', state);
             console.error('  Shop:', shop);
@@ -90,24 +84,21 @@ router.get('/callback', async (req, res) => {
             });
         }
 
-        console.log('✅ State found in database');
+        console.log('✅ State found in nonce store');
 
         // Check if state has expired
-        if (new Date() > oauthState.expiresAt) {
+        if (new Date() > nonceStore.get(shop).expiresAt) {
             console.error('❌ State has expired');
-            console.error('  Expired at:', oauthState.expiresAt);
+            console.error('  Expired at:', nonceStore.get(shop));
             console.error('  Current time:', new Date());
-            await oauthState.destroy();
             return res.status(403).json({
                 error: 'State has expired',
                 message: 'OAuth state expired. Please restart the OAuth flow.'
             });
         }
-
         console.log('✅ State has not expired');
 
-        // Check if state has already been used (prevent replay attacks)
-        if (oauthState.used) {
+        if (nonceStore.get(shop).used) {
             console.error('❌ State has already been used');
             return res.status(403).json({
                 error: 'State already used',
@@ -116,10 +107,6 @@ router.get('/callback', async (req, res) => {
         }
 
         console.log('✅ State has not been used');
-
-        // Mark state as used
-        await oauthState.update({ used: true });
-        console.log('✅ State marked as used');
 
         // Verify HMAC
         if (!ShopifyService.verifyHmac(req.query)) {
@@ -134,27 +121,33 @@ router.get('/callback', async (req, res) => {
         console.log('✅ Access token obtained');
 
         // Save or update store in database
-        const [store, created] = await Store.upsert({
-            shopDomain: shop,
+        const storeDetails = await Store.upsert({
+            storeName: shop.split('.')[0],
+            storeDomain: shop,
             accessToken: tokenData.access_token,
-            scope: tokenData.scope,
-            isInstalled: true,
+            isActive: true,
             installedAt: new Date()
         });
+        const [storeData, created] = storeDetails;
 
         // Clean up used state
-        await oauthState.destroy();
+        const setCallbackStateValues = {
+            nonce: null,
+            used: true,
+            expiresAt: null
+        }
+        nonceStore.set(shop, setCallbackStateValues)
         console.log('✅ OAuth state cleaned up');
 
         console.log('🎉 OAuth flow completed successfully!');
 
         res.json({
             success: true,
-            message: created ? 'Store connected successfully' : 'Store updated successfully',
+            message: storeData?.createdAt ? 'Store connected successfully' : 'Store updated successfully',
             store: {
-                id: store.id,
-                shopDomain: store.shopDomain,
-                isInstalled: store.isInstalled
+                id: storeData?.id,
+                storeDomain: storeData?.storeDomain,
+                isActive: storeData?.isActive
             }
         });
     } catch (error) {

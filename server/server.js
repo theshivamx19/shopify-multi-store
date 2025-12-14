@@ -3,8 +3,9 @@ const cors = require('cors');
 const session = require('express-session');
 require('dotenv').config();
 
-const { sequelize, testConnection } = require('./config/database');
+const { sequelize, testConnection } = require('./config/db');
 const { Store, Product, ProductSync, OAuthState } = require('./models');
+
 
 // Import routes
 const authRoutes = require('./routes/auth');
@@ -93,8 +94,8 @@ const startServer = async () => {
         await testConnection();
 
         // Sync database models
-        await sequelize.sync({ alter: true });
-        console.log('✅ Database models synchronized');
+        // await sequelize.sync({ alter: true });
+        // console.log('✅ Database models synchronized');
 
         // Start listening
         app.listen(PORT, () => {

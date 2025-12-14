@@ -327,19 +327,19 @@ app.listen(PORT, () => {
 module.exports = app;
 
 
-# Shopify OAuth Configuration
+// # Shopify OAuth Configuration
 
-# Get these from Shopify Partner Dashboard > Apps > Your App > Overview
-SHOPIFY_API_KEY=your_api_key_here
-SHOPIFY_API_SECRET=your_api_secret_here
+// # Get these from Shopify Partner Dashboard > Apps > Your App > Overview
+// SHOPIFY_API_KEY=your_api_key_here
+// SHOPIFY_API_SECRET=your_api_secret_here
 
-# Scopes your app needs (comma-separated, no spaces)
-SHOPIFY_SCOPES=read_products,write_products,read_orders,write_orders
+// # Scopes your app needs (comma-separated, no spaces)
+// SHOPIFY_SCOPES=read_products,write_products,read_orders,write_orders
 
-# Your app's public URL
-# For local development, use ngrok: https://xxxx.ngrok.io
-# For production, use your actual domain: https://yourdomain.com
-HOST=https://xxxx.ngrok.io
+// # Your app's public URL
+// # For local development, use ngrok: https://xxxx.ngrok.io
+// # For production, use your actual domain: https://yourdomain.com
+// HOST=https://xxxx.ngrok.io
 
-# Server port
-PORT=3000
+// # Server port
+// PORT=3000
