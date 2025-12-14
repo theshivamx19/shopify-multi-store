@@ -1,6 +1,16 @@
 // https://claude.ai/public/artifacts/e20a5340-339f-4c51-9d4c-e49269d6b2cb
 
 
+// SHOPIFY_SCOPES=write_inventory,read_inventory,write_locations,read_locations,read_product_listings,write_product_listings,read_products,write_products
+
+// route:
+
+// http://localhost:8000/products/sync
+// localhost:8000/products?page=1&limit=50
+// localhost:8000/products/17
+// localhost:8000/products/stores/list
+
+
 // ==================== PACKAGE.JSON ====================
 /*
 {
