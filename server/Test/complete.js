@@ -5,6 +5,12 @@
 
 // route:
 
+// https://claude.ai/public/artifacts/2a05700c-9bf0-4f7c-bbb1-30305510cb47
+
+// https://claude.ai/public/artifacts/2a05700c-9bf0-4f7c-bbb1-30305510cb47
+https://claude.ai/public/artifacts/2a05700c-9bf0-4f7c-bbb1-30305510cb47
+
+
 
 // http://localhost:8000/products/sync
 // localhost:8000/products?page=1&limit=50

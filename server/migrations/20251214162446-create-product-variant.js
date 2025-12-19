@@ -39,6 +39,11 @@ module.exports = {
       position: {
         type: Sequelize.INTEGER
       },
+      imageUrl: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        comment: 'Direct image URL for this variant'
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

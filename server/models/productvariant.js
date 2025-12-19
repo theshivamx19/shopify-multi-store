@@ -35,7 +35,12 @@ module.exports = (sequelize, DataTypes) => {
     compareAtPrice: DataTypes.DECIMAL,
     cost: DataTypes.DECIMAL,
     inventoryQuantity: DataTypes.INTEGER,
-    position: DataTypes.INTEGER
+    position: DataTypes.INTEGER,
+    imageUrl: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      comment: 'Direct image URL for this variant'
+    }
   }, {
     sequelize,
     modelName: 'ProductVariant',
